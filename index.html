@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>J&F Store</title>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --rose:#E8927C; --rose-light:#f2b5a4; --rose-pale:#fce8e3;
@@ -16,18 +17,11 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     html{scroll-behavior:smooth;}
     body{background:var(--cream);color:var(--brown);font-family:'Nunito',sans-serif;font-weight:300;}
-
-    /* ═══════════════════════════════
-       CURSOR
-    ═══════════════════════════════ */
-    .cursor{width:8px;height:8px;background:var(--rose);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;transition:transform .1s;}
+    .cursor{width:8px;height:8px;background:var(--rose);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;}
     .cursor-ring{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:all .22s ease;opacity:.7;}
-    body.admin-open .cursor, body.admin-open .cursor-ring,
-    body.login-open .cursor, body.login-open .cursor-ring { display:none; }
+    body.admin-open .cursor,body.admin-open .cursor-ring{display:none;}
 
-    /* ═══════════════════════════════
-       NAV
-    ═══════════════════════════════ */
+    /* NAV */
     nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 4rem;background:rgba(253,248,245,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(201,168,76,.2);}
     .nav-logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;}
     .nav-logo-img{width:46px;height:46px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);}
@@ -39,9 +33,7 @@
     .nav-cta{font-size:.75rem;letter-spacing:.18em;text-transform:uppercase;padding:.6rem 1.6rem;background:var(--green);color:var(--white);text-decoration:none;border-radius:50px;font-weight:500;display:flex;align-items:center;gap:.4rem;transition:all .3s;}
     .nav-cta:hover{background:#1ebe5d;transform:translateY(-1px);}
 
-    /* ═══════════════════════════════
-       HERO
-    ═══════════════════════════════ */
+    /* HERO */
     #accueil{min-height:100vh;display:flex;align-items:center;padding:0 4rem;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--cream) 0%,var(--cream-dark) 100%);}
     .hero-blob{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(232,146,124,.12) 0%,transparent 70%);right:-100px;top:50%;transform:translateY(-50%);border-radius:50%;}
     .hero-blob2{position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 70%);left:-80px;bottom:-80px;border-radius:50%;}
@@ -66,18 +58,14 @@
     .hero-mini{position:absolute;top:2rem;left:-4rem;background:white;border-radius:16px;padding:1rem 1.2rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 10px 30px rgba(90,62,54,.12);border:1px solid rgba(201,168,76,.2);white-space:nowrap;animation:float 3s ease-in-out infinite;}
     @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 
-    /* ═══════════════════════════════
-       SECTIONS COMMON
-    ═══════════════════════════════ */
+    /* SECTIONS */
     .section-header{text-align:center;margin-bottom:3.5rem;}
     .section-tag{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;letter-spacing:.25em;text-transform:uppercase;color:var(--gold);margin-bottom:.8rem;}
     .section-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3.2rem);font-weight:300;color:var(--brown);}
     .section-title em{font-style:italic;color:var(--rose);}
     .section-line{width:50px;height:2px;background:linear-gradient(90deg,var(--rose),var(--gold));margin:1.2rem auto 0;border-radius:2px;}
 
-    /* ═══════════════════════════════
-       CATALOGUE
-    ═══════════════════════════════ */
+    /* CATALOGUE */
     #catalogue{padding:7rem 4rem;background:var(--white);}
     .filter-bar{display:flex;gap:.6rem;justify-content:center;margin-bottom:3rem;flex-wrap:wrap;}
     .filter-btn{padding:.5rem 1.4rem;border:1.5px solid rgba(90,62,54,.15);background:transparent;color:var(--mid);font-family:'Nunito',sans-serif;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;border-radius:50px;transition:all .3s;}
@@ -96,10 +84,11 @@
     .product-price{font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--rose);font-weight:600;}
     .product-btn{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;padding:.5rem 1.1rem;border:none;color:white;background:var(--green);cursor:pointer;border-radius:50px;font-family:'Nunito',sans-serif;transition:all .3s;display:inline-flex;align-items:center;gap:.3rem;text-decoration:none;}
     .product-btn:hover{background:#1ebe5d;transform:translateY(-1px);}
+    .loading-spinner{text-align:center;padding:3rem;color:var(--mid);font-size:.9rem;}
+    .loading-spinner::before{content:'';display:block;width:40px;height:40px;border:3px solid var(--rose-pale);border-top-color:var(--rose);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 1rem;}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ═══════════════════════════════
-       À PROPOS
-    ═══════════════════════════════ */
+    /* À PROPOS */
     #apropos{padding:7rem 4rem;background:linear-gradient(135deg,var(--cream-dark) 0%,var(--cream) 100%);}
     .about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;max-width:1100px;margin:0 auto;}
     .about-visual{height:480px;border-radius:32px;background:linear-gradient(160deg,var(--white) 0%,var(--rose-pale) 100%);border:1.5px solid rgba(232,146,124,.25);display:flex;align-items:center;justify-content:center;font-size:8rem;position:relative;box-shadow:0 30px 60px rgba(232,146,124,.12);}
@@ -110,9 +99,7 @@
     .stat-num{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--rose);font-weight:600;}
     .stat-label{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);margin-top:.2rem;}
 
-    /* ═══════════════════════════════
-       CONTACT
-    ═══════════════════════════════ */
+    /* CONTACT */
     #contact{padding:7rem 4rem;background:var(--white);}
     .contact-wrapper{max-width:700px;margin:0 auto;text-align:center;}
     .contact-info{display:flex;justify-content:center;gap:2.5rem;margin-top:3rem;flex-wrap:wrap;}
@@ -123,9 +110,7 @@
     .contact-value a{color:var(--mid);text-decoration:none;}
     .contact-value a:hover{color:var(--rose);}
 
-    /* ═══════════════════════════════
-       FOOTER
-    ═══════════════════════════════ */
+    /* FOOTER */
     footer{padding:2.5rem 4rem;background:var(--cream-dark);border-top:1px solid rgba(201,168,76,.15);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;}
     .footer-logo{display:flex;align-items:center;gap:.6rem;}
     .footer-logo-img{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--gold);}
@@ -135,23 +120,18 @@
     .footer-socials{display:flex;gap:.8rem;}
     .footer-socials a{width:36px;height:36px;border-radius:50%;background:white;border:1px solid rgba(201,168,76,.2);display:flex;align-items:center;justify-content:center;font-size:.9rem;text-decoration:none;transition:all .2s;}
     .footer-socials a:hover{background:var(--rose-pale);transform:translateY(-2px);}
-    /* ← Le bouton Admin discret */
     .admin-link{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);opacity:.45;border:1px solid rgba(90,62,54,.15);padding:.4rem .9rem;border-radius:50px;cursor:pointer;background:transparent;font-family:'Nunito',sans-serif;transition:all .25s;}
     .admin-link:hover{opacity:1;color:var(--brown);border-color:var(--gold);}
-
-    /* WhatsApp float */
     .wa-float{position:fixed;bottom:2rem;right:2rem;width:58px;height:58px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;box-shadow:0 8px 24px rgba(37,211,102,.4);z-index:500;text-decoration:none;transition:all .3s;animation:waPulse 2.5s infinite;}
     .wa-float:hover{transform:scale(1.1);}
     @keyframes waPulse{0%,100%{box-shadow:0 8px 24px rgba(37,211,102,.4)}50%{box-shadow:0 8px 36px rgba(37,211,102,.7)}}
 
-    /* ═══════════════════════════════
-       LOGIN OVERLAY
-    ═══════════════════════════════ */
+    /* LOGIN */
     #loginOverlay{display:none;position:fixed;inset:0;background:rgba(90,62,54,.35);backdrop-filter:blur(6px);z-index:1000;align-items:center;justify-content:center;}
     #loginOverlay.show{display:flex;}
     .login-box{background:var(--white);border-radius:24px;padding:3rem 2.5rem;width:100%;max-width:400px;text-align:center;box-shadow:0 30px 60px rgba(232,146,124,.2);border:1.5px solid rgba(232,146,124,.2);position:relative;animation:popIn .3s ease;}
     @keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
-    .login-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--mid);line-height:1;}
+    .login-close{position:absolute;top:1rem;right:1.2rem;background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--mid);}
     .login-logo{font-family:'Cormorant Garamond',serif;font-size:2rem;color:var(--rose);font-weight:600;margin-bottom:.3rem;}
     .login-logo span{color:var(--gold);}
     .login-sub{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);margin-bottom:2rem;}
@@ -161,12 +141,9 @@
     .login-btn:hover{background:var(--rose-light);}
     .login-error{color:var(--red);font-size:.8rem;margin-top:.8rem;display:none;}
 
-    /* ═══════════════════════════════
-       ADMIN PANEL (full screen overlay)
-    ═══════════════════════════════ */
+    /* ADMIN */
     #adminPanel{display:none;position:fixed;inset:0;z-index:900;background:var(--cream);overflow:hidden;}
     #adminPanel.show{display:flex;}
-
     .adm-sidebar{width:260px;background:var(--white);border-right:1px solid rgba(232,146,124,.15);display:flex;flex-direction:column;flex-shrink:0;}
     .adm-sidebar-logo{padding:1.8rem 1.5rem;border-bottom:1px solid rgba(232,146,124,.12);font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;color:var(--rose);}
     .adm-sidebar-logo span{color:var(--gold);}
@@ -180,35 +157,25 @@
     .adm-back-btn:hover{background:var(--rose-pale);}
     .adm-logout-btn{width:100%;padding:.7rem;border:1.5px solid rgba(224,92,92,.2);background:transparent;color:var(--mid);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s;letter-spacing:.1em;text-transform:uppercase;}
     .adm-logout-btn:hover{border-color:var(--red);color:var(--red);}
-
     .adm-main{flex:1;overflow-y:auto;padding:2.5rem;}
     .adm-top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;}
     .adm-page-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:400;}
     .adm-page-title em{font-style:italic;color:var(--rose);}
-
-    /* Stats */
     .adm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem;}
     .adm-stat{background:var(--white);border-radius:16px;padding:1.5rem;border:1px solid rgba(232,146,124,.1);}
     .adm-stat-icon{font-size:1.8rem;margin-bottom:.7rem;}
     .adm-stat-num{font-family:'Cormorant Garamond',serif;font-size:2.2rem;color:var(--rose);font-weight:600;}
     .adm-stat-label{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--mid);margin-top:.2rem;}
-
-    /* Panels */
     .adm-panel{display:none;}
     .adm-panel.active{display:block;}
-
-    /* Cards */
     .adm-card{background:var(--white);border-radius:20px;padding:2rem;border:1px solid rgba(232,146,124,.12);margin-bottom:1.5rem;}
     .adm-card h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;margin-bottom:1.5rem;color:var(--brown);}
-
-    /* Form */
     .adm-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
     .adm-fg{display:flex;flex-direction:column;gap:.4rem;}
     .adm-fg.full{grid-column:1/-1;}
     .adm-fg label{font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);font-weight:500;}
     .adm-fg input,.adm-fg select,.adm-fg textarea{padding:.8rem 1rem;background:var(--cream);border:1.5px solid rgba(232,146,124,.18);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.9rem;color:var(--brown);outline:none;transition:border-color .3s;resize:none;}
     .adm-fg input:focus,.adm-fg select:focus,.adm-fg textarea:focus{border-color:var(--rose);}
-
     .img-drop{border:2px dashed rgba(232,146,124,.35);border-radius:14px;padding:2rem;text-align:center;cursor:pointer;transition:all .3s;background:var(--cream);position:relative;}
     .img-drop:hover{border-color:var(--rose);background:var(--rose-pale);}
     .img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
@@ -216,14 +183,12 @@
     .img-drop-text{font-size:.85rem;color:var(--mid);}
     .img-drop-text strong{color:var(--rose);}
     .img-preview-box{width:100%;height:160px;object-fit:cover;border-radius:10px;margin-top:1rem;display:none;border:1.5px solid rgba(232,146,124,.2);}
-
+    .upload-progress{margin-top:.8rem;font-size:.8rem;color:var(--rose);display:none;}
     .adm-form-actions{display:flex;gap:1rem;margin-top:1.5rem;}
     .btn-save{padding:.8rem 2rem;background:var(--rose);color:white;border:none;border-radius:10px;font-family:'Nunito',sans-serif;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .3s;font-weight:500;}
     .btn-save:hover{background:var(--rose-light);}
+    .btn-save:disabled{opacity:.5;cursor:not-allowed;}
     .btn-cancel{padding:.8rem 2rem;border:1.5px solid rgba(90,62,54,.15);background:transparent;color:var(--mid);border-radius:10px;font-family:'Nunito',sans-serif;font-size:.82rem;cursor:pointer;transition:all .3s;}
-    .btn-cancel:hover{border-color:var(--mid);}
-
-    /* Products table */
     .adm-table{background:var(--white);border-radius:20px;border:1px solid rgba(232,146,124,.12);overflow:hidden;}
     .adm-table-header{padding:1.2rem 1.5rem;border-bottom:1px solid rgba(232,146,124,.1);display:flex;align-items:center;justify-content:space-between;}
     .adm-table-header h3{font-family:'Cormorant Garamond',serif;font-size:1.3rem;}
@@ -243,8 +208,6 @@
     .btn-edit:hover{background:var(--gold);color:white;}
     .btn-del{padding:.4rem .8rem;border:1.5px solid rgba(224,92,92,.3);color:var(--red);background:transparent;border-radius:8px;font-size:.7rem;cursor:pointer;font-family:'Nunito',sans-serif;transition:all .2s;}
     .btn-del:hover{background:var(--red);color:white;}
-
-    /* Settings */
     .adm-settings-row{display:flex;align-items:center;justify-content:space-between;padding:.9rem 0;border-bottom:1px solid rgba(232,146,124,.08);flex-wrap:wrap;gap:.5rem;}
     .adm-settings-row:last-child{border-bottom:none;}
     .adm-settings-label{font-size:.88rem;font-weight:500;}
@@ -253,14 +216,11 @@
     .adm-settings-input:focus{border-color:var(--rose);}
     .btn-save-s{padding:.6rem 1.4rem;background:var(--gold);color:white;border:none;border-radius:8px;font-family:'Nunito',sans-serif;font-size:.78rem;cursor:pointer;transition:background .3s;margin-top:1rem;font-weight:500;}
     .btn-save-s:hover{background:var(--gold-light);}
-
-    /* Toast */
     .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--brown);color:white;padding:.9rem 1.8rem;border-radius:12px;font-size:.85rem;opacity:0;transition:all .35s;z-index:9999;}
     .toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
     .toast.success{background:var(--green2);}
     .toast.error{background:var(--red);}
 
-    /* ANIMS */
     @keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
     .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
@@ -275,25 +235,18 @@
       .adm-sidebar{width:200px;} .adm-main{padding:1.5rem;}
       .adm-stats{grid-template-columns:1fr 1fr;}
       .adm-form-grid{grid-template-columns:1fr;}
-      .adm-row{grid-template-columns:48px 1fr 80px;} .adm-row-price,.adm-row .adm-badge{display:none;}
+      .adm-row{grid-template-columns:48px 1fr 80px;}
     }
-    @media(max-width:600px){
-      .adm-sidebar{display:none;} 
-    }
+    @media(max-width:600px){.adm-sidebar{display:none;}}
   </style>
 </head>
 <body>
 
-  <!-- Cursor -->
   <div class="cursor" id="cursor"></div>
   <div class="cursor-ring" id="cursorRing"></div>
-
-  <!-- WhatsApp float -->
   <a class="wa-float" id="waFloat" href="#" target="_blank">💬</a>
 
-  <!-- ══════════════════════════════
-       SITE PUBLIC
-  ══════════════════════════════ -->
+  <!-- ══ SITE PUBLIC ══ -->
   <nav>
     <a href="#accueil" class="nav-logo">
       <img src="J_F_store_____20260225_175546.jpg" alt="J&F" class="nav-logo-img" onerror="this.style.display='none'"/>
@@ -324,7 +277,7 @@
         <div class="hero-card-badge">Nouveau</div>
         <div class="hero-card-info">
           <div class="hero-card-name">Collection Printemps</div>
-          <div class="hero-card-price">À partir de 15 000 FCFA</div>
+          <div class="hero-card-price">À partir de 15 000 HTG</div>
         </div>
       </div>
       <div class="hero-mini">
@@ -345,7 +298,7 @@
       <button class="filter-btn" onclick="filterProducts(this,'habits')">Vêtements</button>
       <button class="filter-btn" onclick="filterProducts(this,'accessoires')">Accessoires</button>
     </div>
-    <div class="products-grid" id="productsGrid"></div>
+    <div class="products-grid" id="productsGrid"><div class="loading-spinner">Chargement des produits...</div></div>
   </section>
 
   <section id="apropos">
@@ -357,10 +310,7 @@
           <h2 class="section-title">À <em>Propos</em></h2>
           <div class="section-line" style="margin:1rem 0 0"></div>
         </div>
-        <p class="about-body reveal">
-          J&F Store est né d'une passion pour la mode accessible et de qualité. Nous croyons que bien s'habiller ne devrait pas être un luxe — c'est pourquoi nous sélectionnons avec amour chaque pièce pour allier style, confort et accessibilité.<br><br>
-          Que ce soit pour le quotidien ou une occasion spéciale, notre boutique est l'endroit parfait pour trouver votre style unique.
-        </p>
+        <p class="about-body reveal">J&F Store est né d'une passion pour la mode accessible et de qualité. Nous croyons que bien s'habiller ne devrait pas être un luxe — c'est pourquoi nous sélectionnons avec amour chaque pièce pour allier style, confort et accessibilité.<br><br>Que ce soit pour le quotidien ou une occasion spéciale, notre boutique est l'endroit parfait pour trouver votre style unique.</p>
         <div class="about-stats reveal">
           <div class="stat-box"><div class="stat-num">200+</div><div class="stat-label">Produits</div></div>
           <div class="stat-box"><div class="stat-num">500+</div><div class="stat-label">Clients</div></div>
@@ -378,31 +328,13 @@
         <div class="section-line"></div>
       </div>
       <div class="contact-info reveal">
-        <div class="contact-item">
-          <div class="contact-icon">📍</div>
-          <div class="contact-label">Adresse</div>
-          <div class="contact-value" id="cAddr">Votre ville, Pays</div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">📱</div>
-          <div class="contact-label">Téléphone</div>
-          <div class="contact-value" id="cPhone">+XX XXX XXX XXX</div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">💬</div>
-          <div class="contact-label">WhatsApp</div>
-          <div class="contact-value"><a id="cWa" href="#" target="_blank">Nous écrire</a></div>
-        </div>
-        <div class="contact-item">
-          <div class="contact-icon">✉️</div>
-          <div class="contact-label">Email</div>
-          <div class="contact-value" id="cEmail">contact@jfstore.com</div>
-        </div>
+        <div class="contact-item"><div class="contact-icon">📍</div><div class="contact-label">Adresse</div><div class="contact-value" id="cAddr">Haïti</div></div>
+        <div class="contact-item"><div class="contact-icon">📱</div><div class="contact-label">Téléphone</div><div class="contact-value" id="cPhone">+509 XX XX XXXX</div></div>
+        <div class="contact-item"><div class="contact-icon">💬</div><div class="contact-label">WhatsApp</div><div class="contact-value"><a id="cWa" href="#" target="_blank">Nous écrire</a></div></div>
+        <div class="contact-item"><div class="contact-icon">💳</div><div class="contact-label">Paiement</div><div class="contact-value" id="cPayment">MonCash / NatCash</div></div>
       </div>
       <div style="margin-top:3rem" class="reveal">
-        <a id="ctaWaBtn" href="#" target="_blank" class="btn-wa" style="display:inline-flex;justify-content:center;font-size:.9rem;padding:1.1rem 3rem;">
-          💬 Nous contacter sur WhatsApp
-        </a>
+        <a id="ctaWaBtn" href="#" target="_blank" class="btn-wa" style="display:inline-flex;justify-content:center;font-size:.9rem;padding:1.1rem 3rem;">💬 Nous contacter sur WhatsApp</a>
       </div>
     </div>
   </section>
@@ -419,14 +351,11 @@
         <a href="#" title="Facebook">👤</a>
         <a id="footerWa" href="#" target="_blank" title="WhatsApp">💬</a>
       </div>
-      <!-- Bouton Admin discret -->
       <button class="admin-link" onclick="openLogin()">⚙️ Espace Admin</button>
     </div>
   </footer>
 
-  <!-- ══════════════════════════════
-       LOGIN OVERLAY
-  ══════════════════════════════ -->
+  <!-- ══ LOGIN ══ -->
   <div id="loginOverlay">
     <div class="login-box">
       <button class="login-close" onclick="closeLogin()">✕</button>
@@ -438,9 +367,7 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════
-       ADMIN PANEL
-  ══════════════════════════════ -->
+  <!-- ══ ADMIN PANEL ══ -->
   <div id="adminPanel">
     <div class="adm-sidebar">
       <div class="adm-sidebar-logo">J<span>&amp;</span>F Store<small>Administration</small></div>
@@ -463,18 +390,18 @@
       <!-- Dashboard -->
       <div class="adm-panel active" id="adm-dashboard">
         <div class="adm-stats">
-          <div class="adm-stat"><div class="adm-stat-icon">👗</div><div class="adm-stat-num" id="stTotal">0</div><div class="adm-stat-label">Produits total</div></div>
-          <div class="adm-stat"><div class="adm-stat-icon">👔</div><div class="adm-stat-num" id="stHabits">0</div><div class="adm-stat-label">Vêtements</div></div>
-          <div class="adm-stat"><div class="adm-stat-icon">👜</div><div class="adm-stat-num" id="stAcc">0</div><div class="adm-stat-label">Accessoires</div></div>
+          <div class="adm-stat"><div class="adm-stat-icon">👗</div><div class="adm-stat-num" id="stTotal">—</div><div class="adm-stat-label">Produits total</div></div>
+          <div class="adm-stat"><div class="adm-stat-icon">👔</div><div class="adm-stat-num" id="stHabits">—</div><div class="adm-stat-label">Vêtements</div></div>
+          <div class="adm-stat"><div class="adm-stat-icon">👜</div><div class="adm-stat-num" id="stAcc">—</div><div class="adm-stat-label">Accessoires</div></div>
         </div>
         <div class="adm-card">
-          <h3>🚀 Démarrage rapide</h3>
+          <h3>🚀 Bienvenue dans l'espace Admin</h3>
           <p style="color:var(--mid);font-size:.9rem;line-height:1.9">
-            Bienvenue dans l'espace admin de <strong>J&F Store</strong> !<br>
-            • Cliquez sur <strong>Ajouter un produit</strong> pour ajouter un article avec une vraie photo.<br>
-            • Cliquez sur <strong>Produits</strong> pour gérer et modifier votre catalogue.<br>
-            • Dans <strong>Paramètres</strong>, entrez votre numéro WhatsApp pour activer les commandes.<br>
-            • Cliquez sur <strong>Retour au site</strong> pour voir le résultat en direct.
+            ✅ Connecté à <strong>Supabase</strong> — vos données sont sauvegardées en ligne !<br>
+            • <strong>Ajouter un produit</strong> → ajoute un article avec photo, visible partout.<br>
+            • <strong>Produits</strong> → gérer et modifier votre catalogue en temps réel.<br>
+            • <strong>Paramètres</strong> → configurer WhatsApp, MonCash, NatCash, adresse.<br>
+            • <strong>Retour au site</strong> → voir les modifications en direct.
           </p>
         </div>
       </div>
@@ -482,26 +409,24 @@
       <!-- Products list -->
       <div class="adm-panel" id="adm-products">
         <div class="adm-table">
-          <div class="adm-table-header">
-            <h3>Tous les produits</h3>
-            <button class="btn-add" onclick="admPanel('add')">+ Ajouter</button>
-          </div>
-          <div id="admProductsList"></div>
+          <div class="adm-table-header"><h3>Tous les produits</h3><button class="btn-add" onclick="admPanel('add')">+ Ajouter</button></div>
+          <div id="admProductsList"><div class="loading-spinner">Chargement...</div></div>
         </div>
       </div>
 
-      <!-- Add / Edit -->
+      <!-- Add/Edit -->
       <div class="adm-panel" id="adm-add">
         <div class="adm-card">
           <h3 id="admFormTitle">Ajouter un produit</h3>
           <input type="hidden" id="editId"/>
+          <input type="hidden" id="editImgUrl"/>
           <div class="adm-form-grid">
             <div class="adm-fg"><label>Nom du produit</label><input type="text" id="fName" placeholder="Ex: Robe Élégante"/></div>
-            <div class="adm-fg"><label>Prix</label><input type="text" id="fPrice" placeholder="Ex: 25 000 FCFA"/></div>
+            <div class="adm-fg"><label>Prix</label><input type="text" id="fPrice" placeholder="Ex: 2500 HTG"/></div>
             <div class="adm-fg"><label>Catégorie</label>
               <select id="fCat"><option value="habits">Vêtement</option><option value="accessoires">Accessoire</option></select>
             </div>
-            <div class="adm-fg"><label>Badge (optionnel)</label>
+            <div class="adm-fg"><label>Badge</label>
               <select id="fBadge"><option value="">Aucun</option><option value="Nouveau">Nouveau</option><option value="Populaire">Populaire</option><option value="Premium">Premium</option><option value="Promo">Promo</option></select>
             </div>
             <div class="adm-fg full"><label>Description</label><textarea id="fDesc" rows="2" placeholder="Courte description..."></textarea></div>
@@ -513,10 +438,11 @@
                 <div class="img-drop-text">Clique ou glisse une photo ici<br><strong>JPG, PNG, WEBP</strong> acceptés</div>
                 <img class="img-preview-box" id="imgPrev"/>
               </div>
+              <div class="upload-progress" id="uploadProgress">⏳ Upload en cours...</div>
             </div>
           </div>
           <div class="adm-form-actions">
-            <button class="btn-save" onclick="saveProduct()">💾 Enregistrer</button>
+            <button class="btn-save" id="btnSave" onclick="saveProduct()">💾 Enregistrer</button>
             <button class="btn-cancel" onclick="cancelEdit()">Annuler</button>
           </div>
         </div>
@@ -526,98 +452,87 @@
       <div class="adm-panel" id="adm-settings">
         <div class="adm-card">
           <h3>⚙️ Paramètres du site</h3>
-          <div class="adm-settings-row">
-            <div><div class="adm-settings-label">Numéro WhatsApp</div><div class="adm-settings-sub">Les clients vous contacteront via ce numéro</div></div>
-            <input class="adm-settings-input" id="sWA" placeholder="+225 XX XX XX XX" type="tel"/>
-          </div>
-          <div class="adm-settings-row">
-            <div><div class="adm-settings-label">Email de contact</div><div class="adm-settings-sub">Affiché dans la section contact</div></div>
-            <input class="adm-settings-input" id="sEmail" placeholder="contact@jfstore.com" type="email"/>
-          </div>
-          <div class="adm-settings-row">
-            <div><div class="adm-settings-label">Adresse</div><div class="adm-settings-sub">Votre localisation</div></div>
-            <input class="adm-settings-input" id="sAddr" placeholder="Votre ville, Pays"/>
-          </div>
-          <div class="adm-settings-row">
-            <div><div class="adm-settings-label">Téléphone</div><div class="adm-settings-sub">Numéro affiché sur le site</div></div>
-            <input class="adm-settings-input" id="sPhone" placeholder="+XX XXX XXX XXX" type="tel"/>
-          </div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Numéro WhatsApp</div><div class="adm-settings-sub">Pour les commandes clients</div></div><input class="adm-settings-input" id="sWA" placeholder="+509 XX XX XXXX" type="tel"/></div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Numéro MonCash</div><div class="adm-settings-sub">Pour les paiements MonCash</div></div><input class="adm-settings-input" id="sMoncash" placeholder="+509 XX XX XXXX" type="tel"/></div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Numéro NatCash</div><div class="adm-settings-sub">Pour les paiements NatCash</div></div><input class="adm-settings-input" id="sNatcash" placeholder="+509 XX XX XXXX" type="tel"/></div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Email</div><div class="adm-settings-sub">Affiché dans la section contact</div></div><input class="adm-settings-input" id="sEmail" placeholder="contact@jfstore.com" type="email"/></div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Adresse</div><div class="adm-settings-sub">Votre localisation en Haïti</div></div><input class="adm-settings-input" id="sAddr" placeholder="Port-au-Prince, Haïti"/></div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Téléphone</div></div><input class="adm-settings-input" id="sPhone" placeholder="+509 XX XX XXXX" type="tel"/></div>
           <button class="btn-save-s" onclick="saveSettings()">✅ Sauvegarder</button>
         </div>
         <div class="adm-card">
           <h3>🔐 Changer le mot de passe</h3>
-          <div class="adm-settings-row">
-            <div><div class="adm-settings-label">Nouveau mot de passe</div></div>
-            <input class="adm-settings-input" id="sPw" type="password" placeholder="Nouveau mot de passe"/>
-          </div>
+          <div class="adm-settings-row"><div><div class="adm-settings-label">Nouveau mot de passe</div></div><input class="adm-settings-input" id="sPw" type="password" placeholder="Nouveau mot de passe"/></div>
           <button class="btn-save-s" onclick="changePw()">🔒 Changer</button>
         </div>
       </div>
+    </div>
+  </div>
 
-    </div><!-- /adm-main -->
-  </div><!-- /adminPanel -->
-
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <!-- ══════════════════════════════
-       JAVASCRIPT
-  ══════════════════════════════ -->
   <script>
-  const DEFAULT_PW = 'jfstore2025';
+  // ══ SUPABASE CONFIG ══
+  const SUPABASE_URL = 'https://qtuufzlifdrmmuvbfcrb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_5aC3lcurPTv6uGL0wQyURw_hovksK3J';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  /* ── CURSOR ── */
-  const cur=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+  const DEFAULT_PW = 'jfstore2025';
+  const EMOJI = {habits:'👗', accessoires:'👜'};
+
+  // ══ CURSOR ══
+  const cur=document.getElementById('cursor'), ring=document.getElementById('cursorRing');
   let mx=0,my=0,rx=0,ry=0;
   document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx-4+'px';cur.style.top=my-4+'px';});
   (function a(){rx+=(mx-rx-16)*.12;ry+=(my-ry-16)*.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(a);})();
 
-  /* ── STORAGE HELPERS ── */
-  const getProducts = () => JSON.parse(localStorage.getItem('jf_products')||'[]');
-  const saveProducts = a => localStorage.setItem('jf_products',JSON.stringify(a));
-  const getSettings  = () => JSON.parse(localStorage.getItem('jf_settings')||'{}');
-
-  /* ── DEFAULT PRODUCTS ── */
-  if(!localStorage.getItem('jf_products')){
-    saveProducts([
-      {id:1,name:'Veste Élégante',cat:'habits',desc:'Coupe moderne, tissu premium',price:'45 000 FCFA',badge:'Nouveau',img:''},
-      {id:2,name:'Robe Chic',cat:'habits',desc:'Parfaite pour toutes occasions',price:'38 000 FCFA',badge:'',img:''},
-      {id:3,name:'Sac à Main',cat:'accessoires',desc:'Cuir synthétique haut de gamme',price:'22 000 FCFA',badge:'Populaire',img:''},
-      {id:4,name:'Chemise Classic',cat:'habits',desc:'100% coton, plusieurs coloris',price:'18 000 FCFA',badge:'',img:''},
-      {id:5,name:'Lunettes de Soleil',cat:'accessoires',desc:'Protection UV400, style moderne',price:'15 000 FCFA',badge:'Nouveau',img:''},
-      {id:6,name:'Pantalon Slim',cat:'habits',desc:'Coupe slim, très confortable',price:'28 000 FCFA',badge:'',img:''},
-      {id:7,name:'Montre Dorée',cat:'accessoires',desc:'Acier inoxydable, cadran doré',price:'55 000 FCFA',badge:'Premium',img:''},
-      {id:8,name:'Sneakers Urban',cat:'habits',desc:'Style streetwear tendance',price:'42 000 FCFA',badge:'',img:''},
-    ]);
-  }
-
-  /* ── WHATSAPP LINKS ── */
+  // ══ WHATSAPP ══
   function waLink(msg){
-    const n=(getSettings().whatsapp||'').replace(/\D/g,'');
+    const n=(window._settings?.whatsapp||'').replace(/\D/g,'');
     return n?`https://wa.me/${n}?text=${encodeURIComponent(msg)}`:'#';
   }
-  function applySettings(){
-    const s=getSettings();
+  function applySettingsToSite(s){
+    window._settings = s;
     const def='Bonjour J&F Store, je suis intéressé(e) par vos produits 👋';
-    ['waFloat','navWaBtn','heroWaBtn','ctaWaBtn','footerWa'].forEach(id=>{const el=document.getElementById(id);if(el)el.href=waLink(def);});
-    const cwa=document.getElementById('cWa');if(cwa)cwa.href=waLink(def);
-    if(s.address) document.getElementById('cAddr').textContent=s.address;
-    if(s.phone)   document.getElementById('cPhone').textContent=s.phone;
-    if(s.email)   document.getElementById('cEmail').textContent=s.email;
+    ['waFloat','navWaBtn','heroWaBtn','ctaWaBtn','footerWa'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.href=waLink(def);
+    });
+    const cwa=document.getElementById('cWa'); if(cwa) cwa.href=waLink(def);
+    if(s.address)  document.getElementById('cAddr').textContent=s.address;
+    if(s.phone)    document.getElementById('cPhone').textContent=s.phone;
+    const pay=[];
+    if(s.moncash)  pay.push('MonCash: '+s.moncash);
+    if(s.natcash)  pay.push('NatCash: '+s.natcash);
+    if(pay.length) document.getElementById('cPayment').textContent=pay.join(' | ');
   }
 
-  /* ── RENDER PRODUCTS (site) ── */
-  const EMOJI={habits:'👗',accessoires:'👜'};
-  function renderProducts(filter){
-    const list=filter==='tous'?getProducts():getProducts().filter(p=>p.cat===filter);
+  // ══ LOAD SETTINGS FROM SUPABASE ══
+  async function loadSettings(){
+    const {data} = await sb.from('settings').select('*');
+    if(!data) return;
+    const s={};
+    data.forEach(row=>{ s[row.key]=row.value; });
+    applySettingsToSite(s);
+    return s;
+  }
+
+  // ══ LOAD PRODUCTS FROM SUPABASE ══
+  async function loadProducts(filter){
     const grid=document.getElementById('productsGrid');
-    if(!list.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:3rem">Aucun produit pour l\'instant.</div>';return;}
-    grid.innerHTML=list.map(p=>{
-      const msg=`Bonjour ! Je suis intéressé(e) par : *${p.name}* (${p.price}) 🛍️`;
+    grid.innerHTML='<div class="loading-spinner">Chargement des produits...</div>';
+    let query = sb.from('products').select('*').order('id', {ascending:false});
+    if(filter && filter!=='tous') query=query.eq('cat',filter);
+    const {data,error}=await query;
+    if(error||!data||!data.length){
+      grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--mid);padding:3rem">Aucun produit pour l\'instant.</div>';
+      return;
+    }
+    grid.innerHTML=data.map(p=>{
+      const msg=`Bonjour ! Je suis intéressé(e) par : *${p.name}* (${p.price}) 🛍️\nMerci de me confirmer la disponibilité.`;
       return `<div class="product-card">
         <div class="product-img">
           ${p.badge?`<span class="product-badge">${p.badge}</span>`:''}
-          ${p.img?`<img src="${p.img}" alt="${p.name}"/>`:(EMOJI[p.cat]||'📦')}
+          ${p.img_url?`<img src="${p.img_url}" alt="${p.name}"/>`:(EMOJI[p.cat]||'📦')}
         </div>
         <div class="product-info">
           <div class="product-cat">${p.cat==='habits'?'Vêtement':'Accessoire'}</div>
@@ -631,13 +546,14 @@
       </div>`;
     }).join('');
   }
+
   function filterProducts(btn,cat){
     document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
-    renderProducts(cat);
+    loadProducts(cat);
   }
 
-  /* ── LOGIN ── */
+  // ══ LOGIN ══
   function openLogin(){
     document.getElementById('loginOverlay').classList.add('show');
     document.getElementById('loginError').style.display='none';
@@ -648,17 +564,12 @@
   function doLogin(){
     const pw=document.getElementById('pwInput').value;
     const stored=localStorage.getItem('jf_pw')||DEFAULT_PW;
-    if(pw===stored){
-      closeLogin();
-      openAdmin();
-    } else {
-      document.getElementById('loginError').style.display='block';
-      document.getElementById('pwInput').value='';
-    }
+    if(pw===stored){closeLogin();openAdmin();}
+    else{document.getElementById('loginError').style.display='block';document.getElementById('pwInput').value='';}
   }
   function doLogout(){closeAdmin();showToast('👋 Déconnecté');}
 
-  /* ── ADMIN PANEL ── */
+  // ══ ADMIN ══
   function openAdmin(){
     document.getElementById('adminPanel').classList.add('show');
     document.body.classList.add('admin-open');
@@ -668,9 +579,9 @@
   function closeAdmin(){
     document.getElementById('adminPanel').classList.remove('show');
     document.body.classList.remove('admin-open');
-    applySettings();
-    renderProducts('tous');
-    document.querySelectorAll('.filter-btn').forEach((b,i)=>{b.classList.toggle('active',i===0);});
+    loadSettings();
+    loadProducts('tous');
+    document.querySelectorAll('.filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   }
 
   const admTitles={dashboard:'Tableau de <em>Bord</em>',products:'Mes <em>Produits</em>',add:'Ajouter un <em>Produit</em>',settings:'Paramètres du <em>Site</em>'};
@@ -683,36 +594,38 @@
     document.querySelectorAll('.adm-nav-item')[idx].classList.add('active');
     if(id==='products') renderAdmProducts();
     if(id==='dashboard') updateStats();
-    if(id==='add' && !document.getElementById('editId').value) resetForm();
+    if(id==='add'&&!document.getElementById('editId').value) resetForm();
   }
 
-  /* Stats */
-  function updateStats(){
-    const p=getProducts();
-    document.getElementById('stTotal').textContent=p.length;
-    document.getElementById('stHabits').textContent=p.filter(x=>x.cat==='habits').length;
-    document.getElementById('stAcc').textContent=p.filter(x=>x.cat==='accessoires').length;
+  async function updateStats(){
+    const {data}=await sb.from('products').select('id,cat');
+    if(!data) return;
+    document.getElementById('stTotal').textContent=data.length;
+    document.getElementById('stHabits').textContent=data.filter(x=>x.cat==='habits').length;
+    document.getElementById('stAcc').textContent=data.filter(x=>x.cat==='accessoires').length;
   }
 
-  /* Render admin products */
-  function renderAdmProducts(){
-    const p=getProducts();
+  async function renderAdmProducts(){
     const el=document.getElementById('admProductsList');
-    if(!p.length){el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--mid)">Aucun produit. <span style="color:var(--rose);cursor:pointer" onclick="admPanel(\'add\')">Ajouter →</span></div>';return;}
-    el.innerHTML=p.map(x=>`
+    el.innerHTML='<div class="loading-spinner">Chargement...</div>';
+    const {data}=await sb.from('products').select('*').order('id',{ascending:false});
+    if(!data||!data.length){
+      el.innerHTML='<div style="padding:2rem;text-align:center;color:var(--mid)">Aucun produit. <span style="color:var(--rose);cursor:pointer" onclick="admPanel(\'add\')">Ajouter →</span></div>';
+      return;
+    }
+    el.innerHTML=data.map(x=>`
       <div class="adm-row">
-        <div class="adm-row-thumb">${x.img?`<img src="${x.img}" alt="${x.name}"/>`:(EMOJI[x.cat]||'📦')}</div>
+        <div class="adm-row-thumb">${x.img_url?`<img src="${x.img_url}" alt="${x.name}"/>`:(EMOJI[x.cat]||'📦')}</div>
         <div><div class="adm-row-name">${x.name}</div><div class="adm-row-cat">${x.cat==='habits'?'Vêtement':'Accessoire'}</div></div>
         <div class="adm-row-price">${x.price}</div>
         <div>${x.badge?`<span class="adm-badge">${x.badge}</span>`:''}</div>
         <div class="adm-row-actions">
-          <button class="btn-edit" onclick="editProduct(${x.id})">✏️ Éditer</button>
+          <button class="btn-edit" onclick='editProduct(${JSON.stringify(x)})'>✏️ Éditer</button>
           <button class="btn-del" onclick="delProduct(${x.id})">🗑️</button>
         </div>
       </div>`).join('');
   }
 
-  /* Image preview */
   function previewImg(e){
     const f=e.target.files[0]; if(!f) return;
     const r=new FileReader();
@@ -720,80 +633,117 @@
     r.readAsDataURL(f);
   }
 
-  /* Save product */
-  function saveProduct(){
+  async function uploadImage(file){
+    const ext=file.name.split('.').pop();
+    const path=`products/${Date.now()}.${ext}`;
+    const {data,error}=await sb.storage.from('product-images').upload(path,file,{upsert:true});
+    if(error) throw error;
+    const {data:urlData}=sb.storage.from('product-images').getPublicUrl(path);
+    return urlData.publicUrl;
+  }
+
+  async function saveProduct(){
     const name=document.getElementById('fName').value.trim();
     const price=document.getElementById('fPrice').value.trim();
     if(!name||!price){showToast('❌ Nom et prix obligatoires','error');return;}
-    const p={
-      name, price,
-      cat:  document.getElementById('fCat').value,
-      desc: document.getElementById('fDesc').value.trim(),
-      badge:document.getElementById('fBadge').value,
-      img:  (()=>{const i=document.getElementById('imgPrev');return i.style.display!=='none'?i.src:'';})(),
-    };
-    const eid=document.getElementById('editId').value;
-    const arr=getProducts();
-    if(eid){
-      const idx=arr.findIndex(x=>x.id==eid);
-      if(idx>-1){arr[idx]={...arr[idx],...p,img:p.img||arr[idx].img};}
-      saveProducts(arr); showToast('✅ Produit modifié !','success');
-    } else {
-      p.id=arr.length?Math.max(...arr.map(x=>x.id))+1:1;
-      arr.push(p); saveProducts(arr); showToast('✅ Produit ajouté !','success');
+    const btn=document.getElementById('btnSave');
+    btn.disabled=true; btn.textContent='⏳ Sauvegarde...';
+    let img_url=document.getElementById('editImgUrl').value||'';
+    const fileInput=document.getElementById('fImg');
+    if(fileInput.files[0]){
+      try{
+        document.getElementById('uploadProgress').style.display='block';
+        img_url=await uploadImage(fileInput.files[0]);
+        document.getElementById('uploadProgress').style.display='none';
+      }catch(e){
+        showToast('❌ Erreur upload image','error');
+        btn.disabled=false; btn.textContent='💾 Enregistrer';
+        return;
+      }
     }
-    resetForm(); renderAdmProducts(); updateStats();
+    const product={name,price,cat:document.getElementById('fCat').value,desc:document.getElementById('fDesc').value.trim(),badge:document.getElementById('fBadge').value,img_url};
+    const eid=document.getElementById('editId').value;
+    let error;
+    if(eid){
+      ({error}=await sb.from('products').update(product).eq('id',eid));
+      if(!error) showToast('✅ Produit modifié !','success');
+    } else {
+      ({error}=await sb.from('products').insert([product]));
+      if(!error) showToast('✅ Produit ajouté !','success');
+    }
+    if(error){showToast('❌ Erreur: '+error.message,'error');}
+    btn.disabled=false; btn.textContent='💾 Enregistrer';
+    resetForm(); await renderAdmProducts(); await updateStats();
     setTimeout(()=>admPanel('products'),700);
   }
 
-  function editProduct(id){
-    const p=getProducts().find(x=>x.id===id); if(!p) return;
-    document.getElementById('editId').value=id;
+  function editProduct(p){
+    document.getElementById('editId').value=p.id;
+    document.getElementById('editImgUrl').value=p.img_url||'';
     document.getElementById('fName').value=p.name;
     document.getElementById('fPrice').value=p.price;
     document.getElementById('fCat').value=p.cat;
     document.getElementById('fDesc').value=p.desc||'';
     document.getElementById('fBadge').value=p.badge||'';
     const img=document.getElementById('imgPrev');
-    if(p.img){img.src=p.img;img.style.display='block';}else{img.style.display='none';}
+    if(p.img_url){img.src=p.img_url;img.style.display='block';}
+    else img.style.display='none';
     document.getElementById('admFormTitle').textContent='Modifier le produit';
     admPanel('add');
   }
 
-  function delProduct(id){
+  async function delProduct(id){
     if(!confirm('Supprimer ce produit ?')) return;
-    saveProducts(getProducts().filter(x=>x.id!==id));
-    renderAdmProducts(); updateStats();
+    await sb.from('products').delete().eq('id',id);
     showToast('🗑️ Produit supprimé','success');
+    await renderAdmProducts(); await updateStats();
   }
 
   function cancelEdit(){resetForm();admPanel('products');}
   function resetForm(){
-    ['editId','fName','fPrice','fDesc'].forEach(id=>document.getElementById(id).value='');
+    ['editId','editImgUrl','fName','fPrice','fDesc'].forEach(id=>document.getElementById(id).value='');
     document.getElementById('fCat').value='habits';
     document.getElementById('fBadge').value='';
     document.getElementById('fImg').value='';
     const i=document.getElementById('imgPrev');i.src='';i.style.display='none';
+    document.getElementById('uploadProgress').style.display='none';
     document.getElementById('admFormTitle').textContent='Ajouter un produit';
+    document.getElementById('btnSave').disabled=false;
+    document.getElementById('btnSave').textContent='💾 Enregistrer';
   }
 
-  /* Settings */
-  function loadAdmSettings(){
-    const s=getSettings();
-    document.getElementById('sWA').value   =s.whatsapp||'';
-    document.getElementById('sEmail').value=s.email||'';
-    document.getElementById('sAddr').value =s.address||'';
-    document.getElementById('sPhone').value=s.phone||'';
+  async function loadAdmSettings(){
+    const {data}=await sb.from('settings').select('*');
+    if(!data) return;
+    const s={};
+    data.forEach(r=>s[r.key]=r.value);
+    document.getElementById('sWA').value      = s.whatsapp||'';
+    document.getElementById('sMoncash').value = s.moncash||'';
+    document.getElementById('sNatcash').value = s.natcash||'';
+    document.getElementById('sEmail').value   = s.email||'';
+    document.getElementById('sAddr').value    = s.address||'';
+    document.getElementById('sPhone').value   = s.phone||'';
   }
-  function saveSettings(){
-    localStorage.setItem('jf_settings',JSON.stringify({
-      whatsapp:document.getElementById('sWA').value.trim(),
-      email:   document.getElementById('sEmail').value.trim(),
-      address: document.getElementById('sAddr').value.trim(),
-      phone:   document.getElementById('sPhone').value.trim(),
-    }));
+
+  async function saveSetting(key,value){
+    const {data}=await sb.from('settings').select('id').eq('key',key);
+    if(data&&data.length) await sb.from('settings').update({value}).eq('key',key);
+    else await sb.from('settings').insert([{key,value}]);
+  }
+
+  async function saveSettings(){
+    const pairs={
+      whatsapp: document.getElementById('sWA').value.trim(),
+      moncash:  document.getElementById('sMoncash').value.trim(),
+      natcash:  document.getElementById('sNatcash').value.trim(),
+      email:    document.getElementById('sEmail').value.trim(),
+      address:  document.getElementById('sAddr').value.trim(),
+      phone:    document.getElementById('sPhone').value.trim(),
+    };
+    await Promise.all(Object.entries(pairs).map(([k,v])=>saveSetting(k,v)));
     showToast('✅ Paramètres sauvegardés !','success');
   }
+
   function changePw(){
     const pw=document.getElementById('sPw').value.trim();
     if(!pw||pw.length<6){showToast('❌ Mot de passe trop court (6 min)','error');return;}
@@ -802,20 +752,20 @@
     showToast('🔒 Mot de passe changé !','success');
   }
 
-  /* Toast */
   function showToast(msg,type=''){
     const t=document.getElementById('toast');
     t.textContent=msg; t.className='toast '+type+' show';
-    setTimeout(()=>t.classList.remove('show'),2800);
+    setTimeout(()=>t.classList.remove('show'),3000);
   }
 
-  /* ── SCROLL REVEAL ── */
+  // ══ SCROLL REVEAL ══
   const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible');});},{threshold:.1});
   document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
-  /* ── INIT ── */
-  applySettings();
-  renderProducts('tous');
+  // ══ INIT ══
+  window._settings={};
+  loadSettings();
+  loadProducts('tous');
   </script>
 </body>
 </html>
